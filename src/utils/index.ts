@@ -1,4 +1,5 @@
-import { Account, Transaction, SALARY, PLAN_COLORS, DEFAULT_ACCOUNTS, DEFAULT_TRANSACTIONS } from '../types';
+import { Account, Transaction, PLAN_COLORS, DEFAULT_ACCOUNTS, DEFAULT_TRANSACTIONS } from '../types';
+export { SALARY } from '../types';
 
 const START = new Date(new Date().getFullYear(), new Date().getMonth(), 1); // Current month start
 

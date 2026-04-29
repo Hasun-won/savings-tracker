@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Account, Transaction } from '../types';
 import * as utils from '../utils';
 
 const Register: React.FC = () => {
-  const { accounts, transactions, currentMonthIndex, updateAccounts, updateTransactions } = useApp();
+  const { accounts, transactions, currentMonthIndex, setCurrentMonthIndex, updateAccounts, updateTransactions } = useApp();
   const [activeTab, setActiveTab] = useState<'transactions' | 'plans'>('transactions');
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -15,9 +15,8 @@ const Register: React.FC = () => {
   };
 
   const changeMonth = (delta: number) => {
-    // This will update the global currentMonthIndex via context
     const newIndex = Math.max(0, Math.min(11, currentMonthIndex + delta));
-    // Since setCurrentMonthIndex is in context, we need to call it, but for now, we'll assume it's handled
+    setCurrentMonthIndex(newIndex);
   };
 
   const renderCalendar = () => {
