@@ -1,0 +1,332 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.wrap { padding: 1.5rem 0; }
+.tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.tab { padding: 8px 16px; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; border-top: none; border-left: none; border-right: none; }
+.tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); font-weight: 500; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.metric-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.metric-value { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.metric-value.green { color: #3B6D11; }
+.metric-value.red { color: #A32D2D; }
+.metric-value.blue { color: #185FA5; }
+.section-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.accounts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.account-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px; }
+.account-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.account-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); display: flex; align-items: center; margin-bottom: 4px; }
+.account-detail { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 8px; line-height: 1.5; }
+.account-balance { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.account-progress { height: 3px; background: var(--color-border-tertiary); border-radius: 2px; margin-top: 8px; }
+.account-progress-fill { height: 100%; border-radius: 2px; }
+.chart-wrap { position: relative; width: 100%; height: 260px; margin-bottom: 1.5rem; }
+.log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.log-table th { text-align: left; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; padding: 6px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.log-table td { padding: 8px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
+.log-table tr:last-child td { border-bottom: none; }
+.badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+.badge-in { background: #EAF3DE; color: #3B6D11; }
+.badge-out { background: #FCEBEB; color: #A32D2D; }
+.add-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 1.5rem; }
+.form-group label { display: block; font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.form-group input, .form-group select { width: 100%; }
+.add-btn { padding: 8px 14px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; height: 36px; }
+.nav-row { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+.nav-btn { background: none; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 5px 12px; font-size: 13px; cursor: pointer; color: var(--color-text-primary); }
+.month-label { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.panel { display: none; }
+.panel.active { display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; font-size: 12px; color: var(--color-text-secondary); }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-sq { width: 10px; height: 10px; border-radius: 2px; }
+.timeline-bar { height: 4px; border-radius: 2px; background: var(--color-border-tertiary); position: relative; margin-bottom: 1.5rem; }
+.timeline-bar-fill { position: absolute; height: 100%; border-radius: 2px; top: 0; }
+</style>
+
+<div class="wrap">
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">Cash flow tracker showing monthly income, savings accounts, and transaction log</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('overview')">Overview</button>
+  <button class="tab" onclick="switchTab('accounts')">Accounts</button>
+  <button class="tab" onclick="switchTab('log')">Log</button>
+</div>
+
+<div id="tab-overview" class="panel active">
+  <div class="nav-row">
+    <button class="nav-btn" onclick="changeMonth(-1)">←</button>
+    <span class="month-label" id="month-label"></span>
+    <button class="nav-btn" onclick="changeMonth(1)">→</button>
+  </div>
+  <div class="metrics" id="metrics"></div>
+  <p class="section-title">Monthly cash flow</p>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-sq" style="background:#639922;"></span>Take-home (after savings)</span>
+    <span class="legend-item"><span class="legend-sq" style="background:#E24B4A;"></span>Total saved/invested</span>
+    <span class="legend-item"><span class="legend-sq" style="background:#378ADD;"></span>Cumulative savings</span>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="overviewChart" role="img" aria-label="Bar chart showing monthly income breakdown and cumulative savings over 12 months">Monthly cash flow overview chart</canvas>
+  </div>
+</div>
+
+<div id="tab-accounts" class="panel">
+  <p class="section-title">Active accounts</p>
+  <div class="accounts" id="accounts-grid"></div>
+  <p class="section-title">Savings timeline (12 months from Apr 2025)</p>
+  <div id="timeline-section"></div>
+</div>
+
+<div id="tab-log" class="panel">
+  <p class="section-title">Add transaction</p>
+  <div class="add-form">
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" id="tx-date">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <input type="text" id="tx-desc" placeholder="e.g. Groceries">
+    </div>
+    <div class="form-group">
+      <label>Amount (₩)</label>
+      <input type="number" id="tx-amount" placeholder="30000">
+    </div>
+    <button class="add-btn" onclick="addTx()">+ Add</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <button class="nav-btn" onclick="setFilter('all')" id="f-all">All</button>
+    <button class="nav-btn" onclick="setFilter('in')" id="f-in">Inflow</button>
+    <button class="nav-btn" onclick="setFilter('out')" id="f-out">Outflow</button>
+  </div>
+  <table class="log-table">
+    <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Amount</th></tr></thead>
+    <tbody id="tx-body"></tbody>
+  </table>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SALARY = 3500;
+const START = new Date(2025, 3, 1);
+
+const ACCOUNTS = [
+  { id: 'daily', name: 'Daily savings', color: '#378ADD', dotColor: '#378ADD', amount: 30, freq: 'daily', startM: 3, startD: 20, days: 100, total: 3000 },
+  { id: 'monthly200', name: 'Monthly savings', color: '#3B6D11', dotColor: '#639922', amount: 200, freq: 'monthly', startM: 3, days: 365, months: 12, total: 2400 },
+  { id: 'monthly500', name: 'May savings', color: '#BA7517', dotColor: '#EF9F27', amount: 500, freq: 'monthly', startM: 4, days: 365, months: 12, total: 6000 },
+  { id: 'stocks', name: 'Stocks', color: '#7F77DD', dotColor: '#7F77DD', amount: 500, freq: 'monthly-salary', startM: 3, months: 12, total: 6000 },
+  { id: 'crypto', name: 'Crypto', color: '#D85A30', dotColor: '#D85A30', amount: 500, freq: 'monthly-salary', startM: 3, months: 12, total: 6000 },
+];
+
+let currentMonthOffset = 0;
+let txLog = [
+  { date: '2025-04-20', desc: 'Monthly salary', amount: 3500, type: 'in' },
+  { date: '2025-04-20', desc: 'Daily savings (start)', amount: 30, type: 'out' },
+  { date: '2025-04-20', desc: 'Monthly savings $200', amount: 200, type: 'out' },
+  { date: '2025-04-20', desc: 'Stocks', amount: 500, type: 'out' },
+  { date: '2025-04-20', desc: 'Crypto', amount: 500, type: 'out' },
+];
+let txFilter = 'all';
+let overviewChart = null;
+
+function getMonthDate() {
+  const d = new Date(START);
+  d.setMonth(d.getMonth() + currentMonthOffset);
+  return d;
+}
+
+function formatMoney(n) { return '$' + n.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}); }
+
+function monthOutflows(mIdx) {
+  let out = 0;
+  ACCOUNTS.forEach(a => {
+    if (mIdx < a.startM) return;
+    if (a.freq === 'daily' && mIdx === a.startM) {
+      const daysInMonth = 30 - 20 + 1;
+      out += a.amount * Math.min(daysInMonth, a.days);
+    } else if (a.freq === 'daily' && mIdx > a.startM) {
+      const daysSoFar = (mIdx - a.startM) * 30 + 11;
+      if (daysSoFar < a.days) {
+        const remaining = a.days - daysSoFar;
+        out += a.amount * Math.min(30, remaining);
+      }
+    } else if ((a.freq === 'monthly' || a.freq === 'monthly-salary') && mIdx < a.startM + a.months) {
+      out += a.amount;
+    }
+  });
+  return out;
+}
+
+function getAccountBalance(acc, mIdx) {
+  if (mIdx < acc.startM) return 0;
+  if (acc.freq === 'daily') {
+    const daysSoFar = (mIdx - acc.startM) * 30 + 11;
+    return acc.amount * Math.min(daysSoFar, acc.days);
+  }
+  const m = Math.min(mIdx - acc.startM + 1, acc.months || 12);
+  return acc.amount * m;
+}
+
+function getAccountProgress(acc, mIdx) {
+  return Math.min(1, getAccountBalance(acc, mIdx) / acc.total);
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function changeMonth(dir) {
+  currentMonthOffset = Math.max(0, Math.min(11, currentMonthOffset + dir));
+  renderOverview();
+}
+
+function renderOverview() {
+  const d = getMonthDate();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('month-label').textContent = months[d.getMonth()] + ' ' + d.getFullYear();
+  const mIdx = currentMonthOffset;
+  const out = monthOutflows(mIdx);
+  const takehome = SALARY - out;
+  const cumSaved = Array.from({length: mIdx+1}, (_,i) => monthOutflows(i)).reduce((a,b)=>a+b,0);
+
+  const m = document.getElementById('metrics');
+  m.innerHTML = `
+    <div class="metric"><div class="metric-label">Monthly income</div><div class="metric-value blue">${formatMoney(SALARY)}</div></div>
+    <div class="metric"><div class="metric-label">Total saved/invested</div><div class="metric-value red">${formatMoney(out)}</div></div>
+    <div class="metric"><div class="metric-label">Take-home left</div><div class="metric-value green">${formatMoney(Math.max(0,takehome))}</div></div>
+    <div class="metric"><div class="metric-label">Cumul. saved</div><div class="metric-value">${formatMoney(cumSaved)}</div></div>
+  `;
+  renderChart();
+}
+
+function renderChart() {
+  const labels = [];
+  const takeHome = [], saved = [], cumul = [];
+  let cum = 0;
+  const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  for (let i = 0; i < 12; i++) {
+    labels.push(months[i]);
+    const out = monthOutflows(i);
+    cum += out;
+    takeHome.push(Math.max(0, SALARY - out));
+    saved.push(out);
+    cumul.push(cum);
+  }
+  if (overviewChart) overviewChart.destroy();
+  overviewChart = new Chart(document.getElementById('overviewChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Take-home', data: takeHome, backgroundColor: '#639922', stack: 'a' },
+        { label: 'Saved/Invested', data: saved, backgroundColor: '#E24B4A', stack: 'a' },
+        { label: 'Cumul. savings', data: cumul, type: 'line', borderColor: '#378ADD', backgroundColor: 'rgba(55,138,221,0.08)', pointBackgroundColor: '#378ADD', tension: 0.3, yAxisID: 'y2', pointRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString() }
+      }},
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: { stacked: true, grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { font: {size:11}, callback: v => '$'+v } },
+        y2: { position: 'right', grid: { display: false }, ticks: { font:{size:11}, callback: v => '$'+v } }
+      }
+    }
+  });
+}
+
+function renderAccounts() {
+  const mIdx = currentMonthOffset;
+  const grid = document.getElementById('accounts-grid');
+  grid.innerHTML = ACCOUNTS.map(a => {
+    const bal = getAccountBalance(a, mIdx);
+    const prog = getAccountProgress(a, mIdx);
+    const active = mIdx >= a.startM;
+    return `<div class="account-card" style="${!active ? 'opacity:0.45;' : ''}">
+      <div class="account-name"><span class="account-dot" style="background:${a.dotColor}"></span>${a.name}</div>
+      <div class="account-detail">${a.freq === 'daily' ? '$'+a.amount+'/day · 100 days' : '$'+a.amount+'/mo · '+(a.months||12)+' mo'}<br>Target: ${formatMoney(a.total)}</div>
+      <div class="account-balance">${formatMoney(bal)}</div>
+      <div class="account-progress"><div class="account-progress-fill" style="width:${Math.round(prog*100)}%;background:${a.dotColor}"></div></div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:4px;">${Math.round(prog*100)}% of target</div>
+    </div>`;
+  }).join('');
+
+  const ts = document.getElementById('timeline-section');
+  ts.innerHTML = ACCOUNTS.map(a => {
+    const startPct = (a.startM / 12) * 100;
+    const durPct = Math.min(100 - startPct, (a.months || (a.days/30)) / 12 * 100);
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:${a.dotColor};display:inline-block;"></span>${a.name}</span>
+        <span>${formatMoney(a.amount)}/${a.freq==='daily'?'day':'mo'}</span>
+      </div>
+      <div class="timeline-bar">
+        <div class="timeline-bar-fill" style="left:${startPct}%;width:${durPct}%;background:${a.dotColor};"></div>
+      </div>
+    </div>`;
+  }).join('') + `<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-text-secondary);margin-top:-8px;">
+    <span>Apr 25</span><span>Jul 25</span><span>Oct 25</span><span>Jan 26</span><span>Apr 26</span>
+  </div>`;
+}
+
+function renderLog() {
+  const body = document.getElementById('tx-body');
+  let rows = [...txLog];
+  if (txFilter === 'in') rows = rows.filter(r => r.type === 'in');
+  if (txFilter === 'out') rows = rows.filter(r => r.type === 'out');
+  rows.sort((a,b) => b.date.localeCompare(a.date));
+  body.innerHTML = rows.map(r => `<tr>
+    <td style="color:var(--color-text-secondary)">${r.date}</td>
+    <td>${r.desc}</td>
+    <td><span class="badge badge-${r.type}">${r.type === 'in' ? 'Inflow' : 'Outflow'}</span></td>
+    <td style="font-weight:500;color:${r.type==='in'?'#3B6D11':'#A32D2D'}">${r.type==='in'?'+':'-'}${formatMoney(r.amount)}</td>
+  </tr>`).join('');
+}
+
+function addTx() {
+  const date = document.getElementById('tx-date').value;
+  const desc = document.getElementById('tx-desc').value;
+  const amount = parseFloat(document.getElementById('tx-amount').value);
+  if (!date || !desc || !amount) return;
+  txLog.push({ date, desc, amount: Math.abs(amount), type: amount > 0 ? 'in' : 'out' });
+  document.getElementById('tx-desc').value = '';
+  document.getElementById('tx-amount').value = '';
+  renderLog();
+}
+
+function setFilter(f) {
+  txFilter = f;
+  ['all','in','out'].forEach(x => {
+    document.getElementById('f-'+x).style.fontWeight = x===f ? '500' : '400';
+    document.getElementById('f-'+x).style.borderColor = x===f ? 'var(--color-border-primary)' : 'var(--color-border-secondary)';
+  });
+  renderLog();
+}
+
+const today = new Date();
+document.getElementById('tx-date').value = today.toISOString().split('T')[0];
+
+document.querySelectorAll('.tab').forEach((tab, i) => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const names = ['overview','accounts','log'];
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + names[i]).classList.add('active');
+    if (names[i] === 'accounts') renderAccounts();
+    if (names[i] === 'log') renderLog();
+  });
+});
+
+renderOverview();
+renderLog();
+</script>

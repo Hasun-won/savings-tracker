@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Savings Tracker - Register</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f8f9fa;
+      --color-text-primary: #1a1a1a;
+      --color-text-secondary: #666666;
+      --color-border-primary: #cccccc;
+      --color-border-secondary: #e0e0e0;
+      --color-border-tertiary: #f0f0f0;
+      --border-radius-md: 6px;
+      --border-radius-lg: 8px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="register.html" class="active">Register</a>
+  </nav>
+
+  <div class="wrap">
+    <h1>Transaction Registration</h1>
+
+    <div class="page-tabs">
+      <button id="tab-btn-transactions" class="page-tab active" onclick="switchRegisterTab('transactions')">Transactions</button>
+      <button id="tab-btn-plans" class="page-tab" onclick="switchRegisterTab('plans')">Savings Plan</button>
+    </div>
+
+    <div id="tab-transactions" class="panel active">
+      <div class="calendar">
+        <div class="calendar-header">
+          <button class="nav-btn" onclick="changeMonth(-1)">← Previous</button>
+          <h2 id="calendar-title"></h2>
+          <button class="nav-btn" onclick="changeMonth(1)">Next →</button>
+        </div>
+        <div class="calendar-grid" id="calendar-grid">
+          <!-- Calendar days will be generated here -->
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-plans" class="panel">
+      <p class="section-title">Register a savings plan</p>
+      <form id="plan-form" class="add-form" onsubmit="createSavePlan(event)">
+        <div class="form-group">
+          <label for="plan-name">Plan name</label>
+          <input type="text" id="plan-name" placeholder="e.g. Vacation fund" required>
+        </div>
+        <div class="form-group">
+          <label for="plan-amount">Amount</label>
+          <input type="number" id="plan-amount" placeholder="100" required>
+        </div>
+        <div class="form-group">
+          <label for="plan-frequency">Period</label>
+          <select id="plan-frequency" required>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="plan-duration">Duration</label>
+          <input type="number" id="plan-duration" min="1" placeholder="3" required>
+        </div>
+        <div class="form-group">
+          <label for="plan-duration-unit">Duration unit</label>
+          <select id="plan-duration-unit" required>
+            <option value="week">Week(s)</option>
+            <option value="month">Month(s)</option>
+            <option value="year">Year(s)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="plan-start-date">Start date</label>
+          <input type="date" id="plan-start-date" required>
+        </div>
+        <button class="add-btn" type="submit">Save plan</button>
+      </form>
+
+      <p class="section-title">Your savings plans</p>
+      <div class="accounts" id="plan-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal for adding/editing transactions -->
+  <div id="transaction-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3 id="modal-title">Add Transaction</h3>
+      <form id="transaction-form">
+        <div class="form-group">
+          <label for="tx-date">Date</label>
+          <input type="date" id="tx-date" required>
+        </div>
+        <div class="form-group">
+          <label for="tx-desc">Description</label>
+          <input type="text" id="tx-desc" placeholder="e.g. Groceries" required>
+        </div>
+        <div class="form-group">
+          <label for="tx-amount">Amount ($)</label>
+          <input type="number" id="tx-amount" placeholder="30000" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="tx-type">Type</label>
+          <select id="tx-type" required>
+            <option value="in">Inflow</option>
+            <option value="out">Outflow</option>
+          </select>
+        </div>
+        <button type="submit" class="add-btn">Save Transaction</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>
