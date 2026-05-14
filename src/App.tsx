@@ -1,24 +1,37 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Dashboard from './components/Dashboard';
-import Register from './components/Register';
+import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
+import DashboardPage from './pages/Dashboard';
+import RegisterPage from './pages/Register';
 import './App.css';
 
 function App() {
   return (
     <AppProvider>
-      <Router>
-        <nav className="bg-gray-800 text-white p-4">
-          <div className="container mx-auto flex gap-4">
-            <Link to="/" className="hover:text-gray-300">Dashboard</Link>
-            <Link to="/register" className="hover:text-gray-300">Register</Link>
-          </div>
-        </nav>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/register" element={<Register />} />
-        </Routes>
-      </Router>
+      <div className="app-shell">
+        <Router>
+          <header className="app-header">
+            <div className="brand-stack">
+              <span className="brand-title">Savings Tracker</span>
+              <p className="brand-subtitle">Plan your finances with clarity and confidence.</p>
+            </div>
+            <nav className="app-nav">
+              <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+                Dashboard
+              </NavLink>
+              <NavLink to="/register" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+                Register
+              </NavLink>
+            </nav>
+          </header>
+
+          <main className="app-main">
+            <Routes>
+              <Route path="/" element={<DashboardPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+            </Routes>
+          </main>
+        </Router>
+      </div>
     </AppProvider>
   );
 }
